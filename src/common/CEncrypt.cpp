@@ -405,8 +405,12 @@ bool CCrypt::SetClientVerEnum( DWORD iVer, bool bSetEncrypt )
 	iVer -= iVer % 100;		// ignore last digit (eg: 7.0.49.2 -> 7.0.49)
 	for ( size_t i = 0; i < client_keys.size(); i++ )
 	{
-		InitBlowfish();
-		InitTwofish();
+		CCryptClientKey *key = client_keys.at(i);
+		if ( iVer == key->m_client )
+		{
+			if ( SetClientVerIndex(i, bSetEncrypt) )
+				return true;
+		}
 	}
 
 	return false;
@@ -598,7 +602,7 @@ void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 			// to decrypt it correctly :)
 			for (int toCheck = 21; toCheck <= 30; toCheck++)
 			{
--				// no official client allows the account name or password to
+				// no official client allows the account name or password to
 				// exceed 20 chars (2d=16,kr=20), meaning that chars 21-30 must
 				// always be 0x00 (some unofficial clients may allow the user
 				// to enter more, but as they generally don't use encryption
@@ -610,7 +614,7 @@ void CCrypt::LoginCryptStart( DWORD dwIP, BYTE * pEvent, size_t iLen )
 				break;
 			}
 
-			if ( fValid )
+			if ( isValid == true )
 			{
 				LPCTSTR sRawAccountName = reinterpret_cast<LPCTSTR>( m_Raw + 1 );
 				iAccountNameLen = Str_GetBare(pszAccountNameCheck, sRawAccountName, MAX_ACCOUNT_NAME_SIZE, ACCOUNT_NAME_VALID_CHAR);
